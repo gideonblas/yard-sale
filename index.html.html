@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מכירת החצר של בלסבלג פלטי</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --cream: #FBF7F0; --cream-dark: #F2EAD8; --brown: #4A3728; --brown-mid: #7A5C45;
+    --brown-light: #B8926A; --orange: #E8621A; --orange-light: #F28C47; --orange-pale: #FDF0E8;
+    --green: #2D6A4F; --green-light: #52B788; --text: #2C1F14; --text-mid: #6B4F38;
+    --text-light: #9C7A60; --border: #D9C9B5; --shadow: rgba(74,55,40,0.12); --white: #FFFFFF;
+  }
+  body { font-family: 'Heebo', sans-serif; background: var(--cream); color: var(--text); min-height: 100vh; direction: rtl; }
+  #root { min-height: 100vh; }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--cream-dark); }
+  ::-webkit-scrollbar-thumb { background: var(--brown-light); border-radius: 3px; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes slideDown { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+  .fade-in { animation: fadeIn 0.35s ease forwards; }
+
+  /* ── TOP NAV ── */
+  .topnav {
+    background: var(--brown);
+    position: sticky; top: 0; z-index: 200;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+  }
+  .topnav-inner {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 1.25rem; height: 56px; max-width: 1100px; margin: 0 auto;
+  }
+  .topnav-brand { color: var(--orange-light); font-weight: 900; font-size: 0.95rem; line-height: 1.25; }
+  .topnav-brand span { display: block; font-size: 0.68rem; color: rgba(255,255,255,0.45); font-weight: 400; }
+  .topnav-links { display: flex; align-items: center; gap: 4px; }
+  .topnav-link {
+    padding: 6px 14px; border-radius: 8px; cursor: pointer;
+    font-size: 0.85rem; font-weight: 600; color: rgba(255,255,255,0.75);
+    transition: all 0.18s; border: none; background: none;
+    font-family: 'Heebo', sans-serif; white-space: nowrap;
+  }
+  .topnav-link:hover { background: rgba(255,255,255,0.1); color: #fff; }
+  .topnav-link.active { background: rgba(232,98,26,0.25); color: var(--orange-light); }
+  .topnav-share {
+    display: flex; align-items: center; gap: 6px;
+    padding: 6px 14px; border-radius: 8px;
+    font-size: 0.82rem; font-weight: 600; cursor: pointer;
+    background: var(--orange); color: #fff; border: none;
+    font-family: 'Heebo', sans-serif; transition: all 0.18s; white-space: nowrap;
+  }
+  .topnav-share:hover { background: #d0551a; }
+
+  /* mobile hamburger */
+  .hamburger { display: none; background: none; border: none; color: #fff; font-size: 1.4rem; cursor: pointer; padding: 4px; }
+  .mobile-menu {
+    display: none; flex-direction: column; gap: 4px;
+    padding: 0.75rem 1rem 1rem;
+    background: var(--brown); border-top: 1px solid rgba(255,255,255,0.1);
+  }
+  .mobile-menu.open { display: flex; animation: slideDown 0.2s ease; }
+  .mobile-menu .topnav-link { text-align: right; }
+  .mobile-menu .topnav-share { justify-content: center; margin-top: 4px; }
+
+  /* ── LAYOUT ── */
+  .main-content { max-width: 1100px; margin: 0 auto; padding: 1.75rem 1.25rem; }
+
+  /* ── BUTTONS ── */
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 0.55rem 1.1rem; border-radius: 8px;
+    font-family: 'Heebo', sans-serif; font-size: 0.875rem; font-weight: 600;
+    cursor: pointer; transition: all 0.18s; border: none;
+  }
+  .btn-primary { background: var(--orange); color: #fff; }
+  .btn-primary:hover { background: #d0551a; transform: translateY(-1px); }
+  .btn-secondary { background: #fff; color: var(--brown); border: 1.5px solid var(--border); }
+  .btn-secondary:hover { background: var(--cream-dark); }
+  .btn-danger { background: #DC2626; color: #fff; }
+  .btn-danger:hover { background: #b91c1c; }
+  .btn-success { background: var(--green); color: #fff; }
+  .btn-success:hover { background: #1e4d38; }
+  .btn-sm { padding: 0.35rem 0.8rem; font-size: 0.78rem; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+
+  /* ── CARDS ── */
+  .card { background: #fff; border-radius: 14px; border: 1px solid var(--border); overflow: hidden; transition: all 0.22s ease; }
+  .card:hover { box-shadow: 0 8px 24px var(--shadow); transform: translateY(-3px); }
+
+  .item-card { cursor: pointer; }
+  .item-card-img { width:100%; aspect-ratio:4/3; object-fit:cover; background:var(--cream-dark); display:flex; align-items:center; justify-content:center; font-size:2.5rem; color:var(--border); }
+  .item-card-img img { width:100%; height:100%; object-fit:cover; }
+  .item-card-body { padding: 0.875rem 1rem 1rem; }
+  .item-card-title { font-size:0.95rem; font-weight:700; margin-bottom:4px; }
+  .item-card-desc { font-size:0.8rem; color:var(--text-light); line-height:1.4; margin-bottom:8px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .item-card-footer { display:flex; align-items:center; justify-content:space-between; }
+  .price { font-size:1.1rem; font-weight:800; color:var(--orange); }
+
+  /* ── BADGES ── */
+  .badge { display:inline-flex; align-items:center; gap:4px; padding:3px 10px; border-radius:20px; font-size:0.72rem; font-weight:700; }
+  .badge-available { background:#D1FAE5; color:#065F46; }
+  .badge-reserved  { background:#FEF3C7; color:#92400E; }
+  .badge-sold      { background:#FEE2E2; color:#991B1B; }
+
+  /* ── CHIPS ── */
+  .chip { display:inline-flex; align-items:center; padding:5px 13px; border-radius:20px; font-size:0.8rem; font-weight:600; cursor:pointer; transition:all 0.18s; border:1.5px solid var(--border); background:#fff; color:var(--text-mid); user-select:none; }
+  .chip:hover { border-color:var(--orange); color:var(--orange); }
+  .chip.active { background:var(--orange); color:#fff; border-color:var(--orange); }
+
+  /* ── GRID ── */
+  .items-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:1.1rem; }
+
+  /* ── SEARCH ── */
+  .search-bar { display:flex; align-items:center; background:#fff; border:1.5px solid var(--border); border-radius:10px; padding:0.5rem 1rem; gap:8px; transition:border-color 0.2s; }
+  .search-bar:focus-within { border-color:var(--orange); }
+  .search-bar input { border:none; outline:none; font-family:'Heebo',sans-serif; font-size:0.9rem; flex:1; background:transparent; color:var(--text); direction:rtl; }
+  .search-bar input::placeholder { color:var(--text-light); }
+
+  /* ── FORMS ── */
+  .form-group { margin-bottom: 1rem; }
+  .form-label { display:block; font-size:0.85rem; font-weight:600; color:var(--text-mid); margin-bottom:5px; }
+  .form-control { width:100%; padding:0.6rem 0.875rem; border:1.5px solid var(--border); border-radius:8px; font-family:'Heebo',sans-serif; font-size:0.875rem; color:var(--text); background:#fff; transition:border-color 0.2s; direction:rtl; }
+  .form-control:focus { outline:none; border-color:var(--orange); }
+  textarea.form-control { resize:vertical; min-height:80px; }
+  select.form-control { appearance:none; cursor:pointer; }
+
+  /* ── HERO ── */
+  .hero { background:linear-gradient(135deg,var(--brown) 0%,var(--brown-mid) 100%); border-radius:18px; padding:2.25rem 2rem; margin-bottom:1.75rem; color:#fff; position:relative; overflow:hidden; }
+  .hero::before { content:''; position:absolute; top:-30px; left:-30px; width:180px; height:180px; border-radius:50%; background:rgba(232,98,26,0.15); }
+  .hero-content { position:relative; z-index:1; }
+  .hero h2 { font-size:1.9rem; font-weight:900; line-height:1.2; margin-bottom:0.4rem; }
+  .hero p { font-size:0.9rem; color:rgba(255,255,255,0.7); margin-bottom:1.25rem; }
+  .hero-stat strong { display:block; font-size:1.4rem; font-weight:900; color:var(--orange-light); }
+  .hero-stat span { font-size:0.72rem; color:rgba(255,255,255,0.55); }
+  .hero-stats { display:flex; gap:1.5rem; }
+
+  /* ── ITEM DETAIL ── */
+  .item-detail { max-width:680px; margin:0 auto; }
+  .item-detail-img { width:100%; aspect-ratio:16/9; border-radius:14px; overflow:hidden; background:var(--cream-dark); display:flex; align-items:center; justify-content:center; font-size:4rem; color:var(--border); margin-bottom:1.5rem; }
+  .item-detail-img img { width:100%; height:100%; object-fit:cover; }
+  .item-detail-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1rem; }
+  .item-detail-price { font-size:1.9rem; font-weight:900; color:var(--orange); white-space:nowrap; }
+
+  /* ── WAITLIST ── */
+  .waitlist-item { display:flex; align-items:center; gap:12px; padding:0.7rem 1rem; border-bottom:1px solid var(--border); font-size:0.875rem; }
+  .waitlist-item:last-child { border-bottom:none; }
+  .position-badge { width:30px; height:30px; border-radius:50%; background:var(--orange-pale); color:var(--orange); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:0.82rem; flex-shrink:0; }
+
+  /* ── ADMIN TABLE ── */
+  .admin-table { width:100%; border-collapse:collapse; font-size:0.875rem; }
+  .admin-table th { background:var(--cream-dark); padding:0.65rem 0.875rem; text-align:right; font-weight:700; color:var(--text-mid); border-bottom:1px solid var(--border); }
+  .admin-table td { padding:0.65rem 0.875rem; border-bottom:1px solid var(--border); color:var(--text); vertical-align:middle; }
+  .admin-table tr:last-child td { border-bottom:none; }
+  .admin-table tr:hover td { background:var(--cream); }
+
+  /* ── MODAL ── */
+  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:500; display:flex; align-items:center; justify-content:center; padding:1rem; animation:fadeIn 0.2s ease; }
+  .modal { background:#fff; border-radius:16px; padding:1.75rem; width:100%; max-width:520px; max-height:90vh; overflow-y:auto; }
+  .modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; }
+  .modal-title { font-size:1.1rem; font-weight:800; }
+  .modal-close { background:none; border:none; font-size:1.25rem; cursor:pointer; color:var(--text-light); padding:4px; }
+
+  /* ── IMAGE UPLOAD ── */
+  .image-upload-area { border:2px dashed var(--border); border-radius:12px; padding:1.25rem; text-align:center; cursor:pointer; transition:all 0.2s; background:var(--cream); }
+  .image-upload-area:hover { border-color:var(--orange); background:var(--orange-pale); }
+  .image-preview { width:100%; max-height:180px; object-fit:contain; border-radius:8px; margin-top:10px; }
+
+  /* ── TOAST ── */
+  .toast { position:fixed; bottom:1.5rem; left:50%; transform:translateX(-50%); background:var(--brown); color:#fff; padding:0.7rem 1.5rem; border-radius:30px; font-size:0.875rem; font-weight:600; z-index:9999; animation:fadeIn 0.3s ease; white-space:nowrap; }
+
+  /* ── PASSWORD ── */
+  .password-screen { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:55vh; text-align:center; }
+
+  /* ── TABS ── */
+  .tabs { display:flex; gap:4px; margin-bottom:1.5rem; background:var(--cream-dark); border-radius:10px; padding:4px; }
+  .tab { flex:1; padding:0.5rem; text-align:center; border-radius:8px; cursor:pointer; font-size:0.85rem; font-weight:600; transition:all 0.18s; color:var(--text-mid); border:none; background:none; font-family:'Heebo',sans-serif; }
+  .tab.active { background:#fff; color:var(--orange); box-shadow:0 2px 8px var(--shadow); }
+
+  /* ── SECTION TITLE ── */
+  .section-title { font-size:1.2rem; font-weight:800; margin-bottom:1rem; display:flex; align-items:center; gap:8px; }
+  .section-title::after { content:''; flex:1; height:2px; background:linear-gradient(to left,transparent,var(--border)); }
+
+  /* ── MISC ── */
+  .divider { height:1px; background:var(--border); margin:1.25rem 0; }
+  .empty-state { text-align:center; padding:3rem 1rem; color:var(--text-light); }
+  .empty-state .emoji { font-size:2.5rem; margin-bottom:0.75rem; }
+  .info-row { display:flex; align-items:center; gap:8px; font-size:0.85rem; color:var(--text-mid); padding:5px 0; }
+  .flex { display:flex; } .gap-2 { gap:8px; } .items-center { align-items:center; }
+  .justify-between { justify-content:space-between; } .flex-wrap { flex-wrap:wrap; }
+  .mb-1 { margin-bottom:0.5rem; } .mb-2 { margin-bottom:1rem; } .mt-1 { margin-top:0.5rem; } .mt-2 { margin-top:1rem; }
+  .page-header { margin-bottom:1.75rem; }
+  .page-header h2 { font-size:1.5rem; font-weight:900; }
+  .page-header p { font-size:0.875rem; color:var(--text-light); margin-top:3px; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 640px) {
+    .topnav-links { display:none; }
+    .hamburger { display:block; }
+    .items-grid { grid-template-columns:repeat(auto-fill,minmax(155px,1fr)); gap:0.75rem; }
+    .hero { padding:1.5rem 1.25rem; border-radius:14px; }
+    .hero h2 { font-size:1.35rem; }
+    .hero-stats { gap:1rem; }
+    .item-detail-header { flex-direction:column; gap:0.5rem; }
+    .admin-table { font-size:0.78rem; }
+    .admin-table th, .admin-table td { padding:0.5rem 0.6rem; }
+    .main-content { padding:1rem; }
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useCallback, useMemo, useRef } = React;
+
+// ── DB ──
+const DB = {
+  get(k,d){ try{ return JSON.parse(localStorage.getItem(k))??d; }catch{ return d; } },
+  set(k,v){ localStorage.setItem(k,JSON.stringify(v)); }
+};
+function useDB(key,def){
+  const [data,setData]=useState(()=>DB.get(key,def));
+  const update=useCallback(fn=>{
+    setData(prev=>{ const next=typeof fn==='function'?fn(prev):fn; DB.set(key,next); return next; });
+  },[key]);
+  return [data,update];
+}
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+
+const DEFAULT_SUBTITLE = 'פריטים איכותיים במחירים מציאה — בואו לקחת לפני שנגמר!';
+
+const STATUS_LABEL = {available:'פנוי',reserved:'שמור',sold:'נמכר'};
+const STATUS_CLS   = {available:'badge-available',reserved:'badge-reserved',sold:'badge-sold'};
+const STATUS_DOT   = {available:'🟢',reserved:'🟡',sold:'🔴'};
+
+// ── Toast ──
+function Toast({msg,onDone}){
+  useEffect(()=>{ const t=setTimeout(onDone,2500); return()=>clearTimeout(t); },[]);
+  return <div className="toast">{msg}</div>;
+}
+
+// ── Item Image ──
+function ItemImage({url,emoji='📦',className=''}){
+  const [err,setErr]=useState(false);
+  if(!url||err) return <div className={`item-card-img ${className}`}>{emoji}</div>;
+  return <div className={`item-card-img ${className}`}><img src={url} alt="" onError={()=>setErr(true)}/></div>;
+}
+
+// ── Item Card ──
+function ItemCard({item,registrations,onClick}){
+  const count=registrations.filter(r=>r.item_id===item.id&&r.status==='active').length;
+  return(
+    <div className="card item-card fade-in" onClick={()=>onClick(item)}>
+      <ItemImage url={item.image_url}/>
+      <div className="item-card-body">
+        <div className="flex items-center justify-between mb-1" style={{gap:'6px'}}>
+          <span className="item-card-title" style={{flex:1}}>{item.title}</span>
+          <span className={`badge ${STATUS_CLS[item.status]}`}>{STATUS_LABEL[item.status]}</span>
+        </div>
+        {item.category&&<div style={{fontSize:'0.72rem',color:'var(--text-light)',marginBottom:'4px'}}>🏷️ {item.category}</div>}
+        <p className="item-card-desc">{item.description}</p>
+        <div className="item-card-footer">
+          <span className="price">₪{item.price.toLocaleString()}</span>
+          {count>0&&<span style={{fontSize:'0.72rem',color:'var(--text-light)'}}>👥 {count} ממתינים</span>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Reg Form ──
+function RegForm({item,registrations,onRegister}){
+  const [form,setForm]=useState({name:'',phone:'',note:''});
+  const [loading,setLoading]=useState(false);
+  const active=registrations.filter(r=>r.item_id===item.id&&r.status==='active');
+  if(item.status==='sold') return <div style={{textAlign:'center',padding:'1rem',color:'var(--text-light)'}}>🔴 פריט זה נמכר</div>;
+  function submit(e){
+    e.preventDefault();
+    if(!form.name.trim()||!form.phone.trim()) return;
+    setLoading(true);
+    setTimeout(()=>{
+      onRegister({id:uid(),item_id:item.id,registrant_name:form.name.trim(),registrant_phone:form.phone.trim(),note:form.note.trim(),position:active.length+1,status:'active',created_at:new Date().toISOString()});
+      setForm({name:'',phone:'',note:''});
+      setLoading(false);
+    },500);
+  }
+  return(
+    <form onSubmit={submit}>
+      <div className="form-group"><label className="form-label">שם מלא *</label><input className="form-control" placeholder="ישראל ישראלי" value={form.name} onChange={e=>setForm(p=>({...p,name:e.target.value}))} required/></div>
+      <div className="form-group"><label className="form-label">טלפון *</label><input className="form-control" placeholder="050-0000000" value={form.phone} onChange={e=>setForm(p=>({...p,phone:e.target.value}))} required/></div>
+      <div className="form-group"><label className="form-label">הערה (אופציונלי)</label><textarea className="form-control" placeholder="..." value={form.note} onChange={e=>setForm(p=>({...p,note:e.target.value}))}/></div>
+      <button type="submit" className="btn btn-primary" style={{width:'100%'}} disabled={loading}>
+        {loading?'⏳ שולח...':(active.length===0?'✅ הרשם לקבלת הפריט':'📋 הצטרף לרשימת המתנה')}
+      </button>
+      {active.length>0&&<p style={{fontSize:'0.78rem',color:'var(--text-light)',textAlign:'center',marginTop:'8px'}}>{active.length} {active.length===1?'אדם':'אנשים'} לפניך ברשימה</p>}
+    </form>
+  );
+}
+
+// ── Item Detail ──
+function ItemDetail({item,registrations,onRegister,onBack}){
+  const active=registrations.filter(r=>r.item_id===item.id&&r.status==='active').sort((a,b)=>a.position-b.position);
+  function share(){
+    const text=`בדוק/י: ${item.title} ב-₪${item.price}`;
+    if(navigator.share) navigator.share({title:item.title,text});
+    else navigator.clipboard?.writeText(text);
+  }
+  return(
+    <div className="item-detail fade-in">
+      <button className="btn btn-secondary btn-sm mb-2" onClick={onBack}>← חזרה</button>
+      <ItemImage url={item.image_url} className="item-detail-img" emoji="📦"/>
+      <div className="card" style={{padding:'1.5rem'}}>
+        <div className="item-detail-header">
+          <div>
+            <h2 style={{fontSize:'1.4rem',fontWeight:800}}>{item.title}</h2>
+            {item.category&&<span style={{fontSize:'0.8rem',color:'var(--text-light)'}}>🏷️ {item.category}</span>}
+          </div>
+          <div style={{textAlign:'left'}}>
+            <div className="item-detail-price">₪{item.price.toLocaleString()}</div>
+            <span className={`badge ${STATUS_CLS[item.status]}`}>{STATUS_LABEL[item.status]}</span>
+          </div>
+        </div>
+        {item.description&&<p style={{color:'var(--text-mid)',fontSize:'0.9rem',lineHeight:'1.6',marginBottom:'1rem'}}>{item.description}</p>}
+        {item.pickup_date&&<div className="info-row"><span>📅</span><span>איסוף: {new Date(item.pickup_date).toLocaleString('he-IL')}</span></div>}
+        <div className="info-row"><span>👥</span><span>{active.length} {active.length===1?'ממתין':'ממתינים'}</span></div>
+        <button className="btn btn-secondary btn-sm mt-1" onClick={share} style={{marginBottom:'0.5rem'}}>🔗 שתף פריט</button>
+        <div className="divider"/>
+        <h3 style={{fontWeight:800,marginBottom:'1rem',fontSize:'1rem'}}>📝 הרשמה</h3>
+        <RegForm item={item} registrations={registrations} onRegister={onRegister}/>
+        {active.length>0&&(
+          <>
+            <div className="divider"/>
+            <h4 style={{fontWeight:700,fontSize:'0.9rem',marginBottom:'0.75rem',color:'var(--text-mid)'}}>רשימת הממתינים</h4>
+            <div className="card" style={{overflow:'hidden'}}>
+              {active.map(r=>(
+                <div key={r.id} className="waitlist-item">
+                  <div className="position-badge">{r.position}</div>
+                  <div style={{flex:1}}>
+                    {/* PUBLIC: show only position + note, no name */}
+                    <div style={{fontWeight:600,fontSize:'0.875rem'}}>ממתין #{r.position}</div>
+                    {r.note&&<div style={{fontSize:'0.75rem',color:'var(--text-light)'}}>{r.note}</div>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Home ──
+function HomePage({items,registrations,onItemClick,subtitle}){
+  const [search,setSearch]=useState('');
+  const [activeCat,setActiveCat]=useState('');
+  const [statusFilter,setStatusFilter]=useState('');
+  const cats=useMemo(()=>[...new Set(items.map(i=>i.category).filter(Boolean))].sort(),[items]);
+  const filtered=useMemo(()=>items.filter(item=>{
+    const ms=!search||(item.title+' '+(item.description||'')+' '+(item.category||'')).includes(search);
+    const mc=!activeCat||item.category===activeCat;
+    const mst=!statusFilter||item.status===statusFilter;
+    return ms&&mc&&mst;
+  }),[items,search,activeCat,statusFilter]);
+
+  return(
+    <div className="fade-in">
+      <div className="hero">
+        <div className="hero-content">
+          <h2>🏡 מכירת החצר<br/>של בלסבלג פלטי</h2>
+          <p>{subtitle||DEFAULT_SUBTITLE}</p>
+          <div className="hero-stats">
+            <div className="hero-stat"><strong>{items.filter(i=>i.status==='available').length}</strong><span>פריטים פנויים</span></div>
+            <div className="hero-stat"><strong>{registrations.filter(r=>r.status==='active').length}</strong><span>רישומים</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div className="search-bar mb-2">
+        <span>🔍</span>
+        <input placeholder="חיפוש פריטים..." value={search} onChange={e=>setSearch(e.target.value)}/>
+        {search&&<button onClick={()=>setSearch('')} style={{background:'none',border:'none',cursor:'pointer',color:'var(--text-light)',fontSize:'1rem'}}>✕</button>}
+      </div>
+
+      {cats.length>0&&(
+        <div className="flex flex-wrap gap-2 mb-2">
+          <span className={`chip ${!activeCat?'active':''}`} onClick={()=>setActiveCat('')}>הכל</span>
+          {cats.map(c=><span key={c} className={`chip ${activeCat===c?'active':''}`} onClick={()=>setActiveCat(c===activeCat?'':c)}>{c}</span>)}
+        </div>
+      )}
+
+      <div className="flex gap-2 mb-2 flex-wrap">
+        {['','available','reserved','sold'].map(s=>(
+          <span key={s} className={`chip ${statusFilter===s?'active':''}`} onClick={()=>setStatusFilter(s)}>
+            {s===''?'כל הסטטוסים':STATUS_DOT[s]+' '+STATUS_LABEL[s]}
+          </span>
+        ))}
+      </div>
+
+      {filtered.length===0
+        ?<div className="empty-state"><div className="emoji">🔍</div><p>לא נמצאו פריטים תואמים</p></div>
+        :<><div className="section-title">{filtered.length} פריטים</div>
+          <div className="items-grid">
+            {filtered.map(item=><ItemCard key={item.id} item={item} registrations={registrations} onClick={onItemClick}/>)}
+          </div></>
+      }
+    </div>
+  );
+}
+
+// ── Item Modal ──
+function ItemModal({item,categories,onSave,onClose}){
+  const isEdit=!!item;
+  const [form,setForm]=useState(item||{title:'',description:'',price:'',category:'',new_category:'',image_url:'',pickup_date:'',status:'available'});
+  const [useNew,setUseNew]=useState(false);
+  const fileRef=useRef();
+  function handleFile(e){
+    const f=e.target.files[0]; if(!f) return;
+    const r=new FileReader(); r.onload=ev=>setForm(p=>({...p,image_url:ev.target.result})); r.readAsDataURL(f);
+  }
+  function submit(e){
+    e.preventDefault();
+    const finalCat=useNew?form.new_category.trim():form.category;
+    onSave({...form,category:finalCat,price:parseFloat(form.price)||0,id:item?.id||uid(),status:form.status||'available'});
+  }
+  const catOpts=[...new Set([...categories,form.category].filter(Boolean))];
+  return(
+    <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="modal">
+        <div className="modal-header">
+          <h2 className="modal-title">{isEdit?'✏️ עריכת פריט':'➕ פריט חדש'}</h2>
+          <button className="modal-close" onClick={onClose}>✕</button>
+        </div>
+        <form onSubmit={submit}>
+          <div className="form-group"><label className="form-label">שם הפריט *</label><input className="form-control" value={form.title} required onChange={e=>setForm(p=>({...p,title:e.target.value}))} placeholder="מה אתה מוכר?"/></div>
+          <div className="form-group"><label className="form-label">תיאור</label><textarea className="form-control" value={form.description} onChange={e=>setForm(p=>({...p,description:e.target.value}))} placeholder="פרטים נוספים..."/></div>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'12px'}}>
+            <div className="form-group"><label className="form-label">מחיר (₪) *</label><input className="form-control" type="number" min="0" step="0.01" required value={form.price} onChange={e=>setForm(p=>({...p,price:e.target.value}))} placeholder="0"/></div>
+            <div className="form-group"><label className="form-label">סטטוס</label><select className="form-control" value={form.status} onChange={e=>setForm(p=>({...p,status:e.target.value}))}><option value="available">פנוי</option><option value="reserved">שמור</option><option value="sold">נמכר</option></select></div>
+          </div>
+          <div className="form-group">
+            <label className="form-label">קטגוריה</label>
+            {!useNew
+              ?<div style={{display:'flex',gap:'8px'}}>
+                  <select className="form-control" value={form.category} onChange={e=>setForm(p=>({...p,category:e.target.value}))}><option value="">ללא קטגוריה</option>{catOpts.map(c=><option key={c} value={c}>{c}</option>)}</select>
+                  <button type="button" className="btn btn-secondary btn-sm" style={{whiteSpace:'nowrap'}} onClick={()=>setUseNew(true)}>+ חדשה</button>
+                </div>
+              :<div style={{display:'flex',gap:'8px'}}>
+                  <input className="form-control" placeholder="שם קטגוריה חדשה" value={form.new_category} onChange={e=>setForm(p=>({...p,new_category:e.target.value}))}/>
+                  <button type="button" className="btn btn-secondary btn-sm" onClick={()=>{setUseNew(false);setForm(p=>({...p,new_category:''}));}}>← קיימות</button>
+                </div>
+            }
+          </div>
+          <div className="form-group"><label className="form-label">תאריך איסוף</label><input className="form-control" type="datetime-local" value={form.pickup_date} onChange={e=>setForm(p=>({...p,pickup_date:e.target.value}))}/></div>
+          <div className="form-group">
+            <label className="form-label">תמונה</label>
+            <div className="image-upload-area" onClick={()=>fileRef.current?.click()}><div>📷 לחץ להעלאת תמונה / צלם</div><div style={{fontSize:'0.75rem',color:'var(--text-light)',marginTop:'4px'}}>ניתן גם להדביק URL</div></div>
+            <input ref={fileRef} type="file" accept="image/*" capture="environment" style={{display:'none'}} onChange={handleFile}/>
+            <input className="form-control mt-1" placeholder="או הכנס URL תמונה..." value={form.image_url} onChange={e=>setForm(p=>({...p,image_url:e.target.value}))}/>
+            {form.image_url&&<img src={form.image_url} className="image-preview" alt="" onError={()=>setForm(p=>({...p,image_url:''}))}/>}
+          </div>
+          <div style={{display:'flex',gap:'8px',justifyContent:'flex-end',marginTop:'1.25rem'}}>
+            <button type="button" className="btn btn-secondary" onClick={onClose}>ביטול</button>
+            <button type="submit" className="btn btn-primary">{isEdit?'💾 שמור שינויים':'➕ הוסף פריט'}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// ── Export Excel ──
+function exportExcel(items,registrations){
+  const rows=registrations.filter(r=>r.status==='active').map(r=>{
+    const item=items.find(i=>i.id===r.item_id);
+    return{
+      'פריט': item?.title||'—',
+      'קטגוריה': item?.category||'—',
+      'מחיר (₪)': item?.price||0,
+      'סטטוס פריט': STATUS_LABEL[item?.status]||'—',
+      'שם הנרשם': r.registrant_name,
+      'טלפון': r.registrant_phone,
+      'מיקום בתור': r.position,
+      'הערה': r.note||'',
+      'תאריך רישום': r.created_at?new Date(r.created_at).toLocaleString('he-IL'):'',
+    };
+  });
+  if(rows.length===0){ alert('אין רישומים לייצוא'); return; }
+  const ws=XLSX.utils.json_to_sheet(rows);
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'רישומים');
+  ws['!cols']=[{wch:20},{wch:14},{wch:10},{wch:12},{wch:18},{wch:14},{wch:10},{wch:22},{wch:18}];
+  XLSX.writeFile(wb,'yard-sale-registrations.xlsx');
+}
+
+// ── Admin Page ──
+function AdminPage({items,registrations,onSaveItem,onDeleteItem,onDeleteReg,subtitle,onSaveSubtitle}){
+  const [pwd,setPwd]=useState('');
+  const [authed,setAuthed]=useState(false);
+  const [activeTab,setActiveTab]=useState('items');
+  const [showModal,setShowModal]=useState(false);
+  const [editItem,setEditItem]=useState(null);
+  const [expandedItem,setExpandedItem]=useState(null);
+
+  const cats=useMemo(()=>[...new Set(items.map(i=>i.category).filter(Boolean))],[items]);
+
+  const [subtitleDraft,setSubtitleDraft]=useState(subtitle||DEFAULT_SUBTITLE);
+  const [subtitleSaved,setSubtitleSaved]=useState(false);
+
+  function saveSubtitle(){
+    onSaveSubtitle(subtitleDraft.trim()||DEFAULT_SUBTITLE);
+    setSubtitleSaved(true);
+    setTimeout(()=>setSubtitleSaved(false),2000);
+  }
+
+  function login(e){ e.preventDefault(); if(pwd==='3911') setAuthed(true); else{ alert('סיסמה שגויה'); setPwd(''); } }
+
+  if(!authed) return(
+    <div className="password-screen fade-in">
+      <div style={{fontSize:'3rem',marginBottom:'1rem'}}>🔐</div>
+      <h2 style={{fontSize:'1.3rem',fontWeight:800,marginBottom:'0.5rem'}}>ממשק ניהול</h2>
+      <p style={{color:'var(--text-light)',fontSize:'0.875rem',marginBottom:'1.5rem'}}>הכנס סיסמה להמשך</p>
+      <form onSubmit={login} style={{width:'100%',maxWidth:'260px'}}>
+        <input className="form-control mb-1" type="password" placeholder="סיסמה" value={pwd} onChange={e=>setPwd(e.target.value)} style={{textAlign:'center',marginBottom:'12px'}}/>
+        <button type="submit" className="btn btn-primary" style={{width:'100%'}}>כניסה</button>
+      </form>
+    </div>
+  );
+
+  const itemRegs=id=>registrations.filter(r=>r.item_id===id&&r.status==='active').sort((a,b)=>a.position-b.position);
+  const allActive=registrations.filter(r=>r.status==='active');
+
+  return(
+    <div className="fade-in">
+      <div className="page-header">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2>⚙️ ניהול מכירת החצר</h2>
+            <p>{items.length} פריטים · {allActive.length} רישומים פעילים</p>
+          </div>
+          <div className="flex gap-2 items-center">
+            <button className="btn btn-success btn-sm" onClick={()=>exportExcel(items,registrations)}>📥 ייצוא Excel</button>
+            <button className="btn btn-secondary btn-sm" onClick={()=>setAuthed(false)}>🚪 יציאה</button>
+          </div>
+        </div>
+      </div>
+
+      <div className="card mb-2" style={{padding:'1rem 1.25rem'}}>
+        <div style={{fontWeight:700,fontSize:'0.9rem',marginBottom:'8px',color:'var(--text-mid)'}}>✏️ טקסט תת-כותרת בדף הראשי</div>
+        <div style={{display:'flex',gap:'8px'}}>
+          <input
+            className="form-control"
+            value={subtitleDraft}
+            onChange={e=>setSubtitleDraft(e.target.value)}
+            placeholder={DEFAULT_SUBTITLE}
+            style={{flex:1}}
+          />
+          <button className="btn btn-primary btn-sm" style={{whiteSpace:'nowrap'}} onClick={saveSubtitle}>
+            {subtitleSaved?'✅ נשמר!':'💾 שמור'}
+          </button>
+        </div>
+        <div style={{fontSize:'0.75rem',color:'var(--text-light)',marginTop:'6px'}}>
+          טקסט זה מופיע מתחת לכותרת "מכירת החצר של בלסבלג פלטי"
+        </div>
+      </div>
+
+      <div className="tabs">
+        <button className={`tab ${activeTab==='items'?'active':''}`} onClick={()=>setActiveTab('items')}>📦 פריטים ({items.length})</button>
+        <button className={`tab ${activeTab==='regs'?'active':''}`} onClick={()=>setActiveTab('regs')}>📋 רישומים ({allActive.length})</button>
+      </div>
+
+      {activeTab==='items'&&(
+        <>
+          <button className="btn btn-primary mb-2" onClick={()=>{setEditItem(null);setShowModal(true);}}>➕ פריט חדש</button>
+          {items.length===0
+            ?<div className="empty-state"><div className="emoji">📦</div><p>אין פריטים עדיין</p></div>
+            :<div className="card" style={{overflow:'hidden'}}>
+              <table className="admin-table">
+                <thead><tr><th>פריט</th><th>קטגוריה</th><th>מחיר</th><th>סטטוס</th><th>רישומים</th><th>פעולות</th></tr></thead>
+                <tbody>
+                  {items.map(item=>(
+                    <tr key={item.id}>
+                      <td><div style={{fontWeight:600}}>{item.title}</div>{item.pickup_date&&<div style={{fontSize:'0.72rem',color:'var(--text-light)'}}>📅 {new Date(item.pickup_date).toLocaleDateString('he-IL')}</div>}</td>
+                      <td>{item.category||<span style={{color:'var(--text-light)'}}>—</span>}</td>
+                      <td style={{fontWeight:700,color:'var(--orange)'}}>₪{item.price.toLocaleString()}</td>
+                      <td><span className={`badge ${STATUS_CLS[item.status]}`}>{STATUS_LABEL[item.status]}</span></td>
+                      <td>
+                        <button className="btn btn-secondary btn-sm" onClick={()=>setExpandedItem(expandedItem===item.id?null:item.id)}>
+                          👥 {itemRegs(item.id).length}
+                        </button>
+                      </td>
+                      <td>
+                        <div className="flex gap-2">
+                          <button className="btn btn-secondary btn-sm" onClick={()=>{setEditItem(item);setShowModal(true);}}>✏️</button>
+                          <button className="btn btn-danger btn-sm" onClick={()=>{if(confirm('למחוק פריט זה?')) onDeleteItem(item.id);}}>🗑️</button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          }
+
+          {expandedItem&&(
+            <div className="card mt-2" style={{padding:'1rem'}}>
+              <h4 style={{fontWeight:700,marginBottom:'0.75rem',fontSize:'0.95rem'}}>
+                👥 רשימת ממתינים — {items.find(i=>i.id===expandedItem)?.title}
+              </h4>
+              {itemRegs(expandedItem).length===0
+                ?<div style={{color:'var(--text-light)',fontSize:'0.875rem'}}>אין רישומים לפריט זה</div>
+                :<table className="admin-table">
+                  <thead><tr><th>#</th><th>שם</th><th>טלפון</th><th>הערה</th><th>פעולה</th></tr></thead>
+                  <tbody>
+                    {itemRegs(expandedItem).map(r=>(
+                      <tr key={r.id}>
+                        <td><span className="position-badge">{r.position}</span></td>
+                        <td style={{fontWeight:600}}>{r.registrant_name}</td>
+                        <td><a href={`tel:${r.registrant_phone}`} style={{color:'var(--orange)',textDecoration:'none',fontWeight:600}}>{r.registrant_phone}</a></td>
+                        <td style={{color:'var(--text-light)',fontSize:'0.8rem'}}>{r.note||'—'}</td>
+                        <td><button className="btn btn-danger btn-sm" onClick={()=>{if(confirm('לבטל רישום זה?')) onDeleteReg(r.id);}}>🗑️ מחק</button></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              }
+            </div>
+          )}
+        </>
+      )}
+
+      {activeTab==='regs'&&(
+        <div className="card" style={{overflow:'hidden'}}>
+          {allActive.length===0
+            ?<div className="empty-state"><div className="emoji">📋</div><p>אין רישומים עדיין</p></div>
+            :<table className="admin-table">
+              <thead><tr><th>פריט</th><th>שם</th><th>טלפון</th><th>מיקום</th><th>הערה</th><th>פעולה</th></tr></thead>
+              <tbody>
+                {allActive.sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).map(r=>{
+                  const item=items.find(i=>i.id===r.item_id);
+                  return(
+                    <tr key={r.id}>
+                      <td style={{fontWeight:600,fontSize:'0.85rem'}}>{item?.title||'—'}</td>
+                      <td style={{fontWeight:600}}>{r.registrant_name}</td>
+                      <td><a href={`tel:${r.registrant_phone}`} style={{color:'var(--orange)',textDecoration:'none',fontWeight:600}}>{r.registrant_phone}</a></td>
+                      <td><span className="position-badge" style={{margin:0}}>{r.position}</span></td>
+                      <td style={{color:'var(--text-light)',fontSize:'0.8rem'}}>{r.note||'—'}</td>
+                      <td><button className="btn btn-danger btn-sm" onClick={()=>{if(confirm('לבטל רישום זה?')) onDeleteReg(r.id);}}>🗑️ מחק</button></td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          }
+        </div>
+      )}
+
+      {showModal&&<ItemModal item={editItem} categories={cats} onClose={()=>{setShowModal(false);setEditItem(null);}} onSave={data=>{onSaveItem(data);setShowModal(false);setEditItem(null);}}/>}
+    </div>
+  );
+}
+
+// ── App ──
+function App(){
+  const [items,setItems]=useDB('ys_items',[]);
+  const [registrations,setRegs]=useDB('ys_regs',[]);
+  const [subtitle,setSubtitle]=useDB('ys_subtitle',DEFAULT_SUBTITLE);
+  const [page,setPage]=useState('home');
+  const [selectedItem,setSelectedItem]=useState(null);
+  const [toast,setToast]=useState(null);
+  const [mobileOpen,setMobileOpen]=useState(false);
+
+  function showToast(msg){ setToast(msg); }
+  function goTo(p){ setPage(p); setMobileOpen(false); if(p!=='item') setSelectedItem(null); window.scrollTo(0,0); }
+  function openItem(item){ setSelectedItem(item); setPage('item'); window.scrollTo(0,0); }
+
+  function shareApp(){
+    const url=window.location.href;
+    if(navigator.share) navigator.share({title:'מכירת החצר של בלסבלג פלטי',url});
+    else{ navigator.clipboard?.writeText(url); showToast('🔗 הקישור הועתק!'); }
+  }
+
+  function handleRegister(reg){
+    setRegs(prev=>[...prev,reg]);
+    setItems(prev=>prev.map(i=>i.id!==reg.item_id?i:(i.status==='available'?{...i,status:'reserved'}:i)));
+    showToast('✅ נרשמת בהצלחה!');
+  }
+  function handleSaveItem(item){
+    setItems(prev=>{ const ex=prev.find(i=>i.id===item.id); return ex?prev.map(i=>i.id===item.id?item:i):[...prev,item]; });
+    showToast('💾 הפריט נשמר!');
+  }
+  function handleDeleteItem(id){ setItems(prev=>prev.filter(i=>i.id!==id)); setRegs(prev=>prev.filter(r=>r.item_id!==id)); showToast('🗑️ הפריט נמחק'); }
+  function handleDeleteReg(id){ setRegs(prev=>prev.map(r=>r.id===id?{...r,status:'cancelled'}:r)); showToast('❌ הרישום בוטל'); }
+
+  const currentItem=selectedItem?items.find(i=>i.id===selectedItem.id)||selectedItem:null;
+
+  return(
+    <div>
+      {/* TOP NAV */}
+      <nav className="topnav">
+        <div className="topnav-inner">
+          <div className="topnav-brand" style={{cursor:'pointer'}} onClick={()=>goTo('home')}>
+            🏡 מכירת החצר של בלסבלג פלטי
+            <span>ירושלים · חד-פעמי</span>
+          </div>
+          {/* Desktop links */}
+          <div className="topnav-links">
+            <button className={`topnav-link ${(page==='home'||page==='item')?'active':''}`} onClick={()=>goTo('home')}>🏠 פריטים</button>
+            <button className={`topnav-link ${page==='admin'?'active':''}`} onClick={()=>goTo('admin')}>⚙️ ניהול</button>
+            <button className="topnav-share" onClick={shareApp}>🔗 שתף אפליקציה</button>
+          </div>
+          {/* Mobile hamburger */}
+          <button className="hamburger" onClick={()=>setMobileOpen(o=>!o)}>{mobileOpen?'✕':'☰'}</button>
+        </div>
+        {/* Mobile dropdown */}
+        <div className={`mobile-menu ${mobileOpen?'open':''}`}>
+          <button className={`topnav-link ${(page==='home'||page==='item')?'active':''}`} onClick={()=>goTo('home')}>🏠 פריטים</button>
+          <button className={`topnav-link ${page==='admin'?'active':''}`} onClick={()=>goTo('admin')}>⚙️ ניהול</button>
+          <button className="topnav-share" onClick={shareApp}>🔗 שתף אפליקציה</button>
+        </div>
+      </nav>
+
+      {/* MAIN */}
+      <div className="main-content">
+        {page==='home'&&<HomePage items={items} registrations={registrations} onItemClick={openItem} subtitle={subtitle}/>}
+        {page==='item'&&currentItem&&<ItemDetail item={currentItem} registrations={registrations} onRegister={handleRegister} onBack={()=>goTo('home')}/>}
+        {page==='admin'&&<AdminPage items={items} registrations={registrations} onSaveItem={handleSaveItem} onDeleteItem={handleDeleteItem} onDeleteReg={handleDeleteReg} subtitle={subtitle} onSaveSubtitle={setSubtitle}/>}
+      </div>
+
+      {toast&&<Toast msg={toast} onDone={()=>setToast(null)}/>}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
