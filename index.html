@@ -470,7 +470,7 @@ function exportExcel(items,allRegs){
 // ── Admin Page ──
 function AdminPage({items,allRegs,subtitle,onSaveSubtitle}){
   const [pwd,setPwd]=useState('');
-  const [authed,setAuthed]=useState(false);
+  const [authed,setAuthed]=useState(()=>localStorage.getItem('ys_admin')==='1');
   const [activeTab,setActiveTab]=useState('items');
   const [showModal,setShowModal]=useState(false);
   const [editItem,setEditItem]=useState(null);
@@ -484,7 +484,7 @@ function AdminPage({items,allRegs,subtitle,onSaveSubtitle}){
   const itemsArr=Object.values(items||{});
   const allActive=Object.values(allRegs||{}).filter(r=>r.status==='active');
 
-  function login(e){ e.preventDefault(); if(pwd==='3911') setAuthed(true); else{ alert('סיסמה שגויה'); setPwd(''); } }
+  function login(e){ e.preventDefault(); if(pwd==='3911'){ setAuthed(true); localStorage.setItem('ys_admin','1'); } else{ alert('סיסמה שגויה'); setPwd(''); } }
 
   async function handleSaveItem(item){
     await fbSet(`items/${item.id}`, item);
@@ -528,7 +528,7 @@ function AdminPage({items,allRegs,subtitle,onSaveSubtitle}){
           </div>
           <div className="flex gap-2 items-center">
             <button className="btn btn-success btn-sm" onClick={()=>exportExcel(items,allRegs)}>📥 ייצוא Excel</button>
-            <button className="btn btn-secondary btn-sm" onClick={()=>setAuthed(false)}>🚪 יציאה</button>
+            <button className="btn btn-secondary btn-sm" onClick={()=>{ setAuthed(false); localStorage.removeItem('ys_admin'); }}>🚪 יציאה</button>
           </div>
         </div>
       </div>
