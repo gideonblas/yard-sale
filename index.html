@@ -8,13 +8,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
-<script type="text/javascript">
-  const firebaseConfig = {
+<script type="text/javascript" data-no-babel="true">
+window.__firebaseConfig = {
     apiKey: "AIzaSyDFCt8f36tzFwSdBDgP1DNNrn8UCwdce5E",
     authDomain: "yard-sale-712cb.firebaseapp.com",
     databaseURL: "https://yard-sale-712cb-default-rtdb.firebaseio.com",
@@ -22,10 +21,12 @@
     storageBucket: "yard-sale-712cb.firebasestorage.app",
     messagingSenderId: "988025576189",
     appId: "1:988025576189:web:2e55d06a533f8519947c94"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
+
+};
+window.firebase.initializeApp(window.__firebaseConfig);
+window.__db = window.firebase.database();
 </script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -196,6 +197,7 @@ const STATUS_DOT   = {available:'🟢',reserved:'🟡',sold:'🔴'};
 const DEFAULT_SUBTITLE = 'פריטים איכותיים במחירים מציאה — בואו לקחת לפני שנגמר!';
 
 // ── Firebase helpers ──
+const db = window.__db;
 function fbSet(path, val){ return db.ref(path).set(val); }
 function fbUpdate(path, val){ return db.ref(path).update(val); }
 function fbRemove(path){ return db.ref(path).remove(); }
