@@ -13,19 +13,6 @@
 <!-- Firebase v8 (UMD, no internal ES module imports) -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-<script type="text/javascript">
-window.__firebaseConfig = {
-    apiKey: "AIzaSyDFCt8f36tzFwSdBDgP1DNNrn8UCwdce5E",
-    authDomain: "yard-sale-712cb.firebaseapp.com",
-    databaseURL: "https://yard-sale-712cb-default-rtdb.firebaseio.com",
-    projectId: "yard-sale-712cb",
-    storageBucket: "yard-sale-712cb.firebasestorage.app",
-    messagingSenderId: "988025576189",
-    appId: "1:988025576189:web:2e55d06a533f8519947c94"
-};
-window.firebase.initializeApp(window.__firebaseConfig);
-window.__db = window.firebase.database();
-</script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -188,6 +175,18 @@ window.__db = window.firebase.database();
 <script type="text/babel">
 const { useState, useEffect, useCallback, useMemo, useRef } = React;
 
+const firebaseConfig = {
+  apiKey: "AIzaSyDFCt8f36tzFwSdBDgP1DNNrn8UCwdce5E",
+  authDomain: "yard-sale-712cb.firebaseapp.com",
+  databaseURL: "https://yard-sale-712cb-default-rtdb.firebaseio.com",
+  projectId: "yard-sale-712cb",
+  storageBucket: "yard-sale-712cb.firebasestorage.app",
+  messagingSenderId: "988025576189",
+  appId: "1:988025576189:web:2e55d06a533f8519947c94"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
 
 const STATUS_LABEL = {available:'פנוי',reserved:'שמור',sold:'נמכר'};
@@ -196,7 +195,6 @@ const STATUS_DOT   = {available:'🟢',reserved:'🟡',sold:'🔴'};
 const DEFAULT_SUBTITLE = 'פריטים איכותיים במחירים מציאה — בואו לקחת לפני שנגמר!';
 
 // ── Firebase helpers ──
-const db = window.__db;
 function fbSet(path, val){ return db.ref(path).set(val); }
 function fbUpdate(path, val){ return db.ref(path).update(val); }
 function fbRemove(path){ return db.ref(path).remove(); }
